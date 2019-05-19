@@ -24,7 +24,7 @@ else
 fi
 
 tmp=$(mktemp -d /tmp/mailchain.XXXXXX)
-filename="mailchain-${MAILCHAIN_VERSION}-${OS}-64bit"
+filename="mailchain-${MAILCHAIN_VERSION}-${OS}-64bit.tar.gz"
 url="https://github.com/mailchain/mailchain/releases/download/${MAILCHAIN_VERSION}"
 (
   cd "$tmp"
@@ -35,11 +35,18 @@ url="https://github.com/mailchain/mailchain/releases/download/${MAILCHAIN_VERSIO
   echo ""
   echo "Download complete!"
 
+  echo "Extracting ${filename}..."
+  tar -xzvf ${filename}
+  echo "Extracted complete!"
+
+
   echo "Downloading checksum..."
-  checksum=$(openssl dgst -sha256 "${filename}" | awk '{ print $2 }')
+  checksum=$(openssl dgst -sha256 ${filename} | awk '{ print $2 }')
   SHA=$(curl -LO "${url}/checksums.txt" ${url}/checksums.txt | grep "${filename}" | awk '{ print $1 }') 
   
   echo "validating checksum..."
+  echo $(curl -LO "${url}/checksums.txt" ${url}/checksums.txt | grep "${filename}") 
+  
   if [ "$checksum" != "$SHA" ]; then
     echo "Checksum validation failed." >&2
     exit 1
@@ -51,7 +58,7 @@ url="https://github.com/mailchain/mailchain/releases/download/${MAILCHAIN_VERSIO
 (
   cd "$HOME"
   mkdir -p ".mailchain/bin"
-  mv "${tmp}/${filename}" ".mailchain/bin/mailchain"
+  mv "${tmp}/mailchain" ".mailchain/bin/mailchain"
   chmod +x ".mailchain/bin/mailchain"
 )
 
